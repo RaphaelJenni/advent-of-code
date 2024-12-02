@@ -1,6 +1,6 @@
 import kotlin.math.abs
 
-const val SEPARATOR = "   "
+private const val SEPARATOR = "   "
 
 
 fun main() {
@@ -16,7 +16,7 @@ fun main() {
 }
 
 
-class Day01(
+private class Day01(
     input: List<String>
 ) {
     private val left = mutableListOf<Int>()
