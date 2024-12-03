@@ -2,8 +2,10 @@ import java.math.BigInteger
 import java.security.MessageDigest
 import kotlin.io.path.Path
 import kotlin.io.path.readLines
+import kotlin.io.path.readText
 
 fun readInput(name: String) = Path("src/$name").readLines()
+fun readInputAsOne(name: String) = Path("src/$name").readText()
 
 /**
  * Converts string to md5 hash.
