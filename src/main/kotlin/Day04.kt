@@ -47,8 +47,7 @@ private class LetterGrid(
         for (row in 0 until rows) {
             for (col in 0 until cols) {
                 if (grid[row][col] == 'A') {
-                    if (searchMasLeftTopToRightBottom(row, col) && searchMasLeftBottomToRightTop(row, col)
-                    ) count++
+                    if (searchMasLeftTopToRightBottom(row, col) && searchMasLeftBottomToRightTop(row, col)) count++
                 }
             }
         }
