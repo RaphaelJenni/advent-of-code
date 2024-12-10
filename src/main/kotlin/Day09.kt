@@ -1,4 +1,4 @@
-import java.util.LinkedList
+import java.util.*
 
 fun main() {
     val testInput = readInputAsOne("data/day09/sample.day09")
@@ -20,6 +20,9 @@ fun main() {
     val input = readInputAsOne("data/day09/actual.day09")
     val actual = FileCompacter(input)
     actual.checksum().println()
+
+    val actual2 = FileCompacter(input)
+    actual2.checksumWithBlocks().println()
 
 }
 
@@ -46,7 +49,7 @@ class FileCompacter(
             left++
         }
 
-        if(expandedList[left] != SPACE) {
+        if (expandedList[left] != SPACE) {
             result.add(expandedList[left])
         }
 
@@ -71,6 +74,8 @@ class FileCompacter(
     private fun defragmentWholeBlocks(): LinkedList<Block> {
         val expandedList = expandInputAsBlocks(input)
 
+//        println(expandedList.joinToString(""))
+
         var left = 0
         var lastUnusedBlock = expandedList.size - 1
         val result = LinkedList<Block>()
@@ -78,32 +83,45 @@ class FileCompacter(
         while (left < lastUnusedBlock) {
             if (expandedList[left].id != SPACE) {
                 result.add(expandedList[left])
+                left++
             } else {
                 while (expandedList[lastUnusedBlock].id == SPACE) {
                     lastUnusedBlock--
                 }
 
                 var right = lastUnusedBlock
-                while(expandedList[right].length > expandedList[left].length) {
+                while (right > left && (expandedList[right].length > expandedList[left].length || expandedList[right].id == SPACE)) {
                     right--
+                }
+
+                if (right <= left) {
+                    result.add(expandedList[left])
+                    left++
+                    continue
                 }
 
                 result.add(expandedList[right])
 
+                if (expandedList[left].length > expandedList[right].length) {
+                    expandedList[left].length -= expandedList[right].length
+                } else {
+                    left++
+                }
+
+                expandedList[right] = Block(SPACE, expandedList[right].length)
+
                 if (right == lastUnusedBlock) {
                     lastUnusedBlock--
                 }
-
-
-                lastUnusedBlock--
             }
-            left++
         }
 
-        if(expandedList[left].id != SPACE) {
+        if (expandedList[left].id != SPACE) {
             result.add(expandedList[left])
         }
 
+
+//        println(result.joinToString(""))
 
         return result
     }
@@ -124,11 +142,17 @@ class FileCompacter(
     }
 
     fun checksumWithBlocks(): Long {
+        var index = 0
         val result = defragmentWholeBlocks()
         var sum = 0L
-        for ((index, item) in result.withIndex()) {
+        for (item in result) {
             if (item.id != SPACE) {
-                sum += index * item.id
+                for (i in 0 until item.length) {
+                    sum += index * item.id
+                    index++
+                }
+            } else {
+                index += item.length
             }
         }
 
@@ -150,7 +174,7 @@ class FileCompacter(
                     expandedList.add(id)
                 }
 
-                if(index + 1 >= inputArray.size) break
+                if (index + 1 >= inputArray.size) break
                 val spaceLength = inputArray[index + 1].digitToInt()
 
                 for (i in 0 until spaceLength) {
@@ -165,7 +189,7 @@ class FileCompacter(
             return expandedList.toList()
         }
 
-        private fun expandInputAsBlocks(input: String): List<Block> {
+        private fun expandInputAsBlocks(input: String): MutableList<Block> {
             val inputArray = input.toCharArray()
             val expandedList = LinkedList<Block>()
             var id = 0
@@ -173,24 +197,29 @@ class FileCompacter(
 
             while (index < inputArray.size) {
                 val fileLength = inputArray[index].digitToInt()
-                for (i in 0 until fileLength) {
-                    expandedList.add(Block(id, fileLength))
-                }
+                expandedList.add(Block(id, fileLength))
 
-                if(index + 1 >= inputArray.size) break
+                if (index + 1 >= inputArray.size) break
                 val spaceLength = inputArray[index + 1].digitToInt()
 
-                for (i in 0 until spaceLength) {
-                    expandedList.add(Block(SPACE, spaceLength))
-                }
+                expandedList.add(Block(SPACE, spaceLength))
+
                 id++
                 index += 2
             }
 
-            return expandedList
+            return expandedList.toMutableList()
         }
 
     }
 
-    data class Block(val id: Int, val length: Int)
+    data class Block(val id: Int, var length: Int) {
+        override fun toString(): String {
+            return if (id == SPACE) {
+                ".".repeat(length)
+            } else {
+                id.toString().repeat(length)
+            }
+        }
+    }
 }
